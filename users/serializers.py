@@ -7,7 +7,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id','username', 'email', 'role', 'password']
+        fields = ['id','username', 'email', 'role', "phone", 'password',]
         
     def validate_email(self,value):
         
@@ -16,17 +16,21 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Email exists "
             )
+            
+        return value    
     def validate_username(self,value):
         if len(value) < 3:
             raise serializers.ValidationError(
                 "The username is too short"
             ) 
+        return value    
             
     def validate_password(self,value):
         if len(value) < 8:
             raise serializers.ValidationError(
                 "The passwordis too short"
-            )  
+            ) 
+        return value     
     def validate_role(self, value):
         allowed_roles = ["admin", 'client']
         
@@ -34,33 +38,32 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Role not found"
             )
+        return value    
                   
-            
-    def create(self, validated_data):
+    def create(self, validated_data): 
         
         user = User.objects.create_user(
-            username=validated_data["username"],
-            email=validated_data["email"],
-            password=validated_data["password"],
-            role =validated_data.get("role", "client")
-            
-        )   
+            username=validated_data['username'],
+            email=validated_data['email'],
+            phone=validated_data["phone"],
+            role=validated_data.get('role', 'client'),
+            password=validated_data['password']
+        )
+
+        return user
+             
         
-        return user                
+
             
+
+            
+                            
+                
             
         
             
         
    
 
-    def create(self, validated_data):
-        username = validated_data["username"]
-        email = validated_data["email"]
-        role = validated_data.get("role")
-        password = validated_data["password"]
-        
-        user  = User.objects.create_user(**validated_data)
-        
-        return user
+    
 
