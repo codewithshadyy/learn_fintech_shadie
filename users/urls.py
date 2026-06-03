@@ -7,7 +7,7 @@ from .views import UserRegisterView
 router.register(r"register",UserRegisterView)
 
 urlpatterns = [
-    path("", include(router.url))
+    path("", include(router.urls))
 ]
 
 
