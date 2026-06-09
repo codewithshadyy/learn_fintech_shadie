@@ -82,7 +82,7 @@ class LogoutView(APIView):
 class ForgotPasswordView(APIView):
     
     def post(self, request):
-        email = request.get("email")  
+        email = request.data["email"]  
         
         try:
             
