@@ -3,9 +3,10 @@ from django.shortcuts import render
 from .serializers import UserRegisterSerializer, LoginSerializer
 from .models import User
 from rest_framework.response import Response
+
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -14,6 +15,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 
 class RegisterView(APIView):
+    
     class Meta:
         queryset = User.objects.all()
     def post(self, request):
@@ -31,8 +33,10 @@ class RegisterView(APIView):
     
     
 class LoginView(APIView):
+    permission_classes = []
     class Meta:
             queryset = User.objects.all()
+            
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
