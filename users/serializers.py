@@ -1,4 +1,4 @@
-
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 from .models import User
 
@@ -52,7 +52,25 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
         return user
              
+
+
+class LoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    password  = serializers.CharField()
+    
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
         
+        
+        user = authenticate(username=email, password=password)
+        
+        if not user:
+           raise serializers.ValidationError("Invalid credentials")
+       
+        attrs["user"] = user
+        return user
+           
 
             
 
