@@ -79,6 +79,37 @@ class LogoutView(APIView):
            }, status=status.HTTP_400_BAD_REQUEST)   
            
            
-           
+class ForgotPasswordView(APIView):
+    
+    def post(self, request):
+        email = request.get("email")  
+        
+        try:
+            
+            user = User.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(force_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            
+            reset_link = f"http://127.0.0.1:8000/auth/password-forgot/{uidb64}/{token}"
+            
+            send_mail(
+                subject="Account Password Reset",
+                message=f"Reset your password: {reset_link}",
+                from_email="noreply@example.com",
+                recipient_list=[email]
+            )
+            
+    
+            return Response({
+                "message":"reset Link sent successfully"
+            
+        })    
+            
+            
+        except Exception:
+          return Response({
+               "message":"User not found"
+           },status=status.HTTP_404_NOT_FOUND)
+                         
     
   
