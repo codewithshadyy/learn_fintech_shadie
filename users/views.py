@@ -1,7 +1,8 @@
 from django.shortcuts import render
 
 from .serializers import UserRegisterSerializer, LoginSerializer
-from .models import User
+from django.contrib.auth import get_user_model
+
 from rest_framework.response import Response
 
 from rest_framework import viewsets
@@ -13,6 +14,9 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_decode,urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
+
+
+User = get_user_model()
 
 class RegisterView(APIView):
     
@@ -76,40 +80,45 @@ class LogoutView(APIView):
        except Exception:
            return Response({
                "message":"Invalid token"
-           }, status=status.HTTP_400_BAD_REQUEST)   
-           
-           
+           }, status=status.HTTP_400_BAD_REQUEST) 
+             
 class ForgotPasswordView(APIView):
-    
+
     def post(self, request):
-        email = request.data["email"]  
-        
-        try:
-            
-            user = User.objects.get(email=email)
-            uidb64 = urlsafe_base64_encode(force_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
-            
-            reset_link = f"http://127.0.0.1:8000/auth/password-forgot/{uidb64}/{token}"
-            
-            send_mail(
-                subject="Account Password Reset",
-                message=f"Reset your password: {reset_link}",
-                from_email="noreply@example.com",
-                recipient_list=[email]
+
+        email = request.data.get("email", "").strip().lower()
+
+        user = User.objects.filter(email__iexact=email).first()
+
+        if not user:
+            return Response(
+                {"message": "User not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
+
+        uidb64 = urlsafe_base64_encode(force_bytes(user.id))
+        token = PasswordResetTokenGenerator().make_token(user)
+
+        reset_link = f"http://127.0.0.1:8000/auth/password-reset/{uidb64}/{token}"
+       
+
+        send_mail(
+            subject="Account Password Reset",
+            message=f"Reset your password: {reset_link}",
+            from_email="noreply@example.com",
+            recipient_list=[email]
+        )
+
+        return Response({
+            "message": "Reset link sent successfully"
+        })           
+           
+
             
-    
-            return Response({
-                "message":"reset Link sent successfully"
-            
-        })    
+       
             
             
-        except Exception:
-          return Response({
-               "message":"User not found"
-           },status=status.HTTP_404_NOT_FOUND)
+      
 
 
 class PasswordResetView(APIView):
@@ -130,11 +139,13 @@ class PasswordResetView(APIView):
                 "message":"Invalid link"
                 
             }) 
+            
+            
         if not PasswordResetTokenGenerator().check_token(user,token):
              return Response({
                 "error": "Invalid or expired token"
             }, status=400)
-             
+          
         password = request.data.get("password")
         user.set_password(password)
         user.save()
