@@ -57,6 +57,28 @@ class LoginView(APIView):
         }, status=status.HTTP_200_OK)       
             
         
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
     
+    def post(self, request):
+       
+       try:
+           
+           refresh = request.data["refresh"]
+           token = RefreshToken(refresh)
+           
+           token.blacklist()
+           
+           return Response({
+               "message":"Logged out successfully"
+           })
+           
+       except Exception:
+           return Response({
+               "message":"Invalid token"
+           })   
+           
+           
+           
     
   
