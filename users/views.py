@@ -14,6 +14,8 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 
 class RegisterView(APIView):
+    class Meta:
+        queryset = User.objects.all()
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
         
@@ -29,6 +31,8 @@ class RegisterView(APIView):
     
     
 class LoginView(APIView):
+    class Meta:
+            queryset = User.objects.all()
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
