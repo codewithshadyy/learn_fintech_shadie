@@ -33,19 +33,28 @@ class RegisterView(APIView):
     
     
 class LoginView(APIView):
-    permission_classes = []
-    class Meta:
-            queryset = User.objects.all()
+   
+   
             
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
+        user = serializer.validated_data
         refresh = RefreshToken.for_user(user)
+        
+        
         return Response({
+            
+            "data":{
+                "id":user.id,
+                "username":user.username,
+                "email":user.email,
+                "message":f"welcome back {user.username}"
+            },
+       
             "access": str(refresh.access_token),
             "refresh": str(refresh),
-        })       
+        }, status=status.HTTP_200_OK)       
             
         
     
