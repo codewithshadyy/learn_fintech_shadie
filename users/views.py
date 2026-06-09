@@ -110,6 +110,37 @@ class ForgotPasswordView(APIView):
           return Response({
                "message":"User not found"
            },status=status.HTTP_404_NOT_FOUND)
-                         
+
+
+class PasswordResetView(APIView):
+    
+    def post(self, request, uidb64, token):
+        
+        
+        try:
+            
+           uid  = force_str(urlsafe_base64_decode(uidb64))
+           user = User.objects.get(id=uid)
+                             
+                             
+                             
+        except Exception:
+            return Response({
+                
+                "message":"Invalid link"
+                
+            }) 
+        if not PasswordResetTokenGenerator().check_token(user,token):
+             return Response({
+                "error": "Invalid or expired token"
+            }, status=400)
+             
+        password = request.data.get("password")
+        user.set_password(password)
+        user.save()
+        
+        return Response({
+            "message":"Password reseted successfully"
+        })                             
     
   
