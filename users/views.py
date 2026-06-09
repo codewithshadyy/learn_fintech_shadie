@@ -33,7 +33,7 @@ class RegisterView(APIView):
     
     
 class LoginView(APIView):
-   
+    permission_classes = [AllowAny]
    
             
     def post(self, request):
@@ -64,8 +64,8 @@ class LogoutView(APIView):
        
        try:
            
-           refresh = request.data["refresh"]
-           token = RefreshToken(refresh)
+           refresh_token = request.data["refresh"]
+           token = RefreshToken(refresh_token)
            
            token.blacklist()
            
@@ -76,7 +76,7 @@ class LogoutView(APIView):
        except Exception:
            return Response({
                "message":"Invalid token"
-           })   
+           }, status=status.HTTP_400_BAD_REQUEST)   
            
            
            
